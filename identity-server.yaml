@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  identity-server-deployment
+  namespace: spring-application
+  labels:
+    app:  identity-server-deployment
+spec:
+  selector:
+    matchLabels:
+      app: identity-server
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  identity-server
+    spec:
+      containers:
+      - name:  identityserver
+        image:  hungvu034/identityserver:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 100m
+            memory: 500Mi
+        livenessProbe:
+          tcpSocket:
+            port: 5001
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5001
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        envFrom:
+          - configMapRef: 
+              name: identity-server-config
+        ports:
+        - containerPort: 5001
+          name:  http
+      restartPolicy: Always
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service
+  namespace: spring-application
+spec:
+  selector:
+    app: identity-server
+  type: ClusterIP
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: http
+    protocol: TCP
+    port: 5001
+    targetPort: 5001

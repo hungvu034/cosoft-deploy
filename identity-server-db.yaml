@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  identity-db-deployment
+  namespace: spring-application
+  labels:
+    app:  identity-db-deployment
+spec:
+  selector:
+    matchLabels:
+      app: identity-db
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate  
+  template:
+    metadata:
+      labels:
+        app:  identity-db
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 10001
+      containers:
+      - name:  mssql-server
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 1000Mi
+        #   limits:
+        #     cpu: 100m
+        #     memory: 1000Mi
+        envFrom:
+          - configMapRef:
+              name: identity-server-db-config
+        ports:
+        - containerPort: 1433
+        volumeMounts:
+        - name: mssql-db
+          mountPath: /var/opt/mssql
+      volumes:
+        - name: mssql-db
+          persistentVolumeClaim: 
+            claimName: mssql-data
+      restartPolicy: Always
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: identitydb
+  namespace: spring-application
+spec:
+  selector:
+    app: identity-db
+  type: ClusterIP
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - protocol: TCP
+    port: 1433 
+    targetPort: 1433 

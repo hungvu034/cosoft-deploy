@@ -1,0 +1,42 @@
+# kind: StorageClass
+# apiVersion: storage.k8s.io/v1
+# metadata:
+#      name: mysql-azure-disk
+#      namespace: spring-application
+# provisioner: kubernetes.io/azure-disk
+# parameters:
+#   storageaccounttype: Standard_LRS
+#   kind: Managed
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 3Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: mysql-pv
+  hostPath:
+    path: "/data/mysql"
+
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-data
+  namespace: spring-application
+  annotations:
+    volume.beta.kubernetes.io/storage-class: mysql-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

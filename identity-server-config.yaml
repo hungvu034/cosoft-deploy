@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: identity-server-config
+  namespace: spring-application
+data:
+  ConnectionStrings.DefaultConnection: "Server=identitydb,1433;Database=IdentityDb;User Id=sa;Password=Password123"
+  

@@ -1,0 +1,43 @@
+# kind: StorageClass
+# apiVersion: storage.k8s.io/v1
+# metadata:
+#      name: mssql-azure-disk
+#      namespace: spring-application
+# provisioner: kubernetes.io/azure-disk
+# parameters:
+#   storageaccounttype: Standard_LRS
+#   kind: Managed
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssql-pv
+spec:
+  capacity:
+    storage: 3Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: mssql-pv
+  hostPath:
+    path: "/data/mssql"
+
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mssql-data
+  namespace: spring-application
+  annotations:
+    volume.beta.kubernetes.io/storage-class: mssql-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+

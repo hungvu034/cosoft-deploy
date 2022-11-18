@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vue-js-client-config
+  namespace: spring-application
+data:
+  key: default
