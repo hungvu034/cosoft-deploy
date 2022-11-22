@@ -69,12 +69,12 @@ spec:
     clientIP:
       timeoutSeconds: 10800
   ports:
-  - name: HTTP
+  - name: http
     protocol: TCP
     port: 8080
     targetPort: 8080
     # If you set the `spec.type` field to `NodePort` and you want a specific port number,
     # you can specify a value in the `spec.ports[*].nodePort` field.
-  - name: CommutePort
+  - name: commuteport
     port: 50000
     targetPort: 50000
